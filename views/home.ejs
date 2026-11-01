@@ -1,0 +1,484 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Drive | Google Drive Clone</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f8faff;
+        }
+
+        .upload-box {
+            border: 2px dashed #9ca3af;
+            border-radius: 20px;
+            background: white;
+            transition: 0.2s ease;
+        }
+
+        .upload-box.dragover {
+            border-color: #2563eb;
+            background: #eff6ff;
+            transform: scale(1.01);
+        }
+
+        .choose-btn {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .choose-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .submit-btn {
+            background: #16a34a;
+            color: white;
+            padding: 13px 40px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #15803d;
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- Navbar -->
+
+    <nav class="flex justify-between items-center px-6 md:px-10 py-5 bg-white shadow-sm">
+
+        <div class="flex items-center gap-3">
+
+            <div class="text-3xl">
+                ☁️
+            </div>
+
+            <h1 class="text-xl font-bold text-gray-800">
+                Google Drive Clone
+            </h1>
+
+        </div>
+
+
+        <a
+            href="/user/logout"
+            class="text-red-600 font-semibold hover:underline"
+        >
+            Logout
+        </a>
+
+    </nav>
+
+
+
+    <!-- Main Content -->
+
+    <main class="min-h-[85vh] flex flex-col justify-center items-center px-5 py-12">
+
+
+        <!-- Heading -->
+
+        <div class="text-center mb-8">
+
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800">
+
+                Welcome to My Drive
+
+            </h2>
+
+            <p class="text-gray-500 mt-3">
+
+                Upload and manage your files in one place.
+
+            </p>
+
+        </div>
+
+
+
+        <!-- Upload Form -->
+
+        <form
+            action="/user/upload"
+            method="POST"
+            enctype="multipart/form-data"
+            class="w-full max-w-2xl"
+            id="uploadForm"
+        >
+
+
+            <!-- Drag and Drop Area -->
+
+            <div
+                class="upload-box p-8 md:p-12 text-center"
+                id="dropArea"
+            >
+
+
+                <!-- Upload Icon -->
+
+                <div class="text-7xl mb-5">
+
+                    📁
+
+                </div>
+
+
+
+                <!-- Upload Heading -->
+
+                <h3 class="text-xl md:text-2xl font-semibold text-gray-800">
+
+                    Drag and drop your files here
+
+                </h3>
+
+
+
+                <!-- Description -->
+
+                <p class="text-gray-500 mt-3 mb-7">
+
+                    Or select a file from your computer.
+
+                </p>
+
+
+
+                <!-- Choose File Button -->
+
+                <label class="choose-btn">
+
+                    Choose File
+
+                    <input
+                        type="file"
+                        name="myFile"
+                        id="fileInput"
+                        class="hidden"
+                    >
+
+                </label>
+
+
+
+                <!-- File Size Information -->
+
+                <p class="text-sm text-gray-400 mt-6">
+
+                    Maximum file size: 25 MB
+
+                </p>
+
+
+            </div>
+
+
+
+            <!-- Selected File Information -->
+
+            <div
+                id="fileInfo"
+                class="text-center mt-5 text-gray-700"
+            >
+
+                No file selected
+
+            </div>
+
+
+
+            <!-- Submit Button -->
+
+            <div class="text-center mt-7">
+
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="submit-btn"
+                    disabled
+                >
+
+                    Upload File
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+
+    </main>
+
+
+
+    <!-- JavaScript -->
+
+    <script>
+
+
+        const dropArea =
+            document.getElementById('dropArea');
+
+
+        const fileInput =
+            document.getElementById('fileInput');
+
+
+        const fileInfo =
+            document.getElementById('fileInfo');
+
+
+        const submitBtn =
+            document.getElementById('submitBtn');
+
+
+        const uploadForm =
+            document.getElementById('uploadForm');
+
+
+
+        // Display selected file
+
+        function showFile(file) {
+
+            if (!file) {
+
+                fileInfo.textContent =
+                    'No file selected';
+
+                submitBtn.disabled = true;
+
+                return;
+
+            }
+
+
+            // Check file size
+
+            if (file.size > 25 * 1024 * 1024) {
+
+                alert(
+                    'File size must be less than 25 MB'
+                );
+
+                fileInput.value = '';
+
+                fileInfo.textContent =
+                    'No file selected';
+
+                submitBtn.disabled = true;
+
+                return;
+
+            }
+
+
+            // Convert bytes to MB
+
+            const fileSize =
+                (file.size / (1024 * 1024)).toFixed(2);
+
+
+            // Display file information
+
+            fileInfo.innerHTML = `
+
+                <div class="font-semibold">
+
+                    📄 ${file.name}
+
+                </div>
+
+                <div class="text-sm text-gray-500 mt-1">
+
+                    ${fileSize} MB
+
+                </div>
+
+            `;
+
+
+            submitBtn.disabled = false;
+
+        }
+
+
+
+        // When user selects a file
+
+        fileInput.addEventListener(
+            'change',
+            function () {
+
+                showFile(fileInput.files[0]);
+
+            }
+        );
+
+
+
+        // Prevent default browser drag behavior
+
+        [
+
+            'dragenter',
+            'dragover',
+            'dragleave',
+            'drop'
+
+        ].forEach(eventName => {
+
+            dropArea.addEventListener(
+                eventName,
+                function (event) {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                }
+            );
+
+        });
+
+
+
+        // Highlight upload area
+
+        [
+
+            'dragenter',
+            'dragover'
+
+        ].forEach(eventName => {
+
+            dropArea.addEventListener(
+                eventName,
+                function () {
+
+                    dropArea.classList.add(
+                        'dragover'
+                    );
+
+                }
+            );
+
+        });
+
+
+
+        // Remove highlight
+
+        [
+
+            'dragleave',
+            'drop'
+
+        ].forEach(eventName => {
+
+            dropArea.addEventListener(
+                eventName,
+                function () {
+
+                    dropArea.classList.remove(
+                        'dragover'
+                    );
+
+                }
+            );
+
+        });
+
+
+
+        // Handle dropped file
+
+        dropArea.addEventListener(
+            'drop',
+            function (event) {
+
+                const files =
+                    event.dataTransfer.files;
+
+
+                if (files.length > 0) {
+
+                    fileInput.files = files;
+
+                    showFile(files[0]);
+
+                }
+
+            }
+        );
+
+
+
+        // Check file before submitting
+
+        uploadForm.addEventListener(
+            'submit',
+            function (event) {
+
+                if (!fileInput.files.length) {
+
+                    event.preventDefault();
+
+                    alert(
+                        'Please select a file first'
+                    );
+
+                }
+
+            }
+        );
+
+
+    </script>
+
+
+</body>
+
+</html>
